@@ -26,7 +26,11 @@ executor_count: 1
 executor_type: null
 extensions: {}
 name: bw_api_access_token
-notification_config: {}
+notification_config:
+  alert_on:
+  - trigger_failure
+  teams_config:
+    webhook_url: https://sensadata.webhook.office.com/webhookb2/3ff2e042-04bb-466b-bf40-11c9f9a8dc79@03b3464b-b3a9-4ca6-8ee6-689e41e70cbb/IncomingWebhook/2d1a3b1044274c4895f5c04db23237a4/4bfac518-9651-47ea-aa03-c97ad2b5e941/V2hgz37oR4IBa8VFxKonoG0hI5NZrhwUmIhlnlBu5vsvs1
 remote_variables_dir: null
 retry_config: {}
 run_pipeline_in_one_process: false
