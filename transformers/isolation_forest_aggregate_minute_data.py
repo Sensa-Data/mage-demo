@@ -26,6 +26,11 @@ def transform(data, *args, **kwargs):
         "WaterQuality": ['Bisulfide', 'CO2', 'Conductivity', 'H2S', 'Nitrate', 'Nitrite', 'Oxygen', 'PH', 'TOCeq', 'Temperature', 'Turbidity', 'UV254f', 'UV254t'],
         "feedingsystem": ['AvgFeedHour'],
     }
+    measurements_tag_columns = {
+        "WaterQuality": ['Equipment', 'Section', 'Subunit', 'Unit', 'Origin'],
+        "feedingsystem": ['Equipment', 'Section', 'Subunit', 'Unit', 'Origin'],
+    }
+
     TIME_COL = 'time'
     MEASURING_UNIT_COL = 'MeasuringUnit'
 
@@ -33,30 +38,65 @@ def transform(data, *args, **kwargs):
     aggregated_data = ()
 
     for idx, measurement in enumerate(data):
-        df = measurement[0]
-        tags = measurement[1]
+        df, tags, *_ = measurement
+        if MEASURING_UNIT_COL in tags:
+            tags.remove(MEASURING_UNIT_COL)
+            
         measurement_name = measurements[idx]
         measurement_columns = measurements_field_columns.get(measurement_name)
+        tag_columns = measurements_tag_columns.get(measurement_name)
 
-        field_column_unit_aggregation = {}
-        field_column_unit_aggregation[TIME_COL] = pd.to_datetime(df[TIME_COL]).mean()
 
-        for field_column_name in measurement_columns:
-            field_column_df = df[[TIME_COL, MEASURING_UNIT_COL, field_column_name]].copy()
-            field_column_df = field_column_df.dropna(subset=[field_column_name])
-            fc_unique_values = field_column_df[MEASURING_UNIT_COL].unique()
+        # Prepare data quality df
+        data_quality_rows = []
+        groups = df.groupby(tag_columns)
+        for (equipment, section, subunit, unit, origin), group_data_df in groups:
+            data_quality_row = {}
+            data_quality_row[TIME_COL] = pd.to_datetime(group_data_df[TIME_COL]).mean()
+            data_quality_row['Equipment'] = equipment
+            data_quality_row['Section'] = section
+            data_quality_row['Subunit'] = subunit
+            data_quality_row['Unit'] = unit
+            data_quality_row['Origin'] = origin
 
-            assert len(fc_unique_values) == 1 # Later we will remove single MeasuringUnit assertion
+            all_null_rows = group_data_df[group_data_df[measurement_columns].isna().all(axis=1)]
 
-            fc_non_null_mean = field_column_df[field_column_name].mean()
-            field_column_unit_aggregation[field_column_name] = [fc_non_null_mean]
-            field_column_unit_aggregation[f"{field_column_name}_Unit"] = fc_unique_values
+            data_quality_row['Removed_Data_Count'] = len(all_null_rows)
+            data_quality_row['Total_Data_Count'] = len(group_data_df)
+            data_quality_row['Processing_Step'] = 'data_quality_pipeline'
 
-        single_row_aggregated_df = pd.DataFrame(field_column_unit_aggregation)
-        single_row_aggregated_df.head()
-
+            data_quality_rows.append(data_quality_row)
         
-        aggregated_data = aggregated_data + ((single_row_aggregated_df, tags),)
+        data_quality_df = pd.DataFrame(data_quality_rows)
+
+        # Prepare clean data df
+        non_null_df = df[df[measurement_columns].notna().any(axis=1)]
+        aggregated_row_columns = measurement_columns + tag_columns + [TIME_COL, MEASURING_UNIT_COL]
+
+        aggregated_rows = []
+        groups = non_null_df.groupby(tag_columns)
+        for (equipment, section, subunit, unit, origin), group_data_df in groups:
+            
+            field_column_unit_aggregation = {}
+            field_column_unit_aggregation[TIME_COL] = pd.to_datetime(group_data_df[TIME_COL]).mean()
+            field_column_unit_aggregation['Equipment'] = equipment
+            field_column_unit_aggregation['Section'] = section
+            field_column_unit_aggregation['Subunit'] = subunit
+            field_column_unit_aggregation['Unit'] = unit
+            field_column_unit_aggregation['Origin'] = origin
+
+            for field_column_name in measurement_columns:
+                field_column_unit_aggregation[field_column_name] = group_data_df[field_column_name].mean()
+                fc_unique_values = group_data_df[[field_column_name, MEASURING_UNIT_COL]].dropna(subset=[field_column_name])[MEASURING_UNIT_COL].unique()
+                assert len(fc_unique_values) <= 1
+
+                field_column_unit_aggregation[f"{field_column_name}_Unit"] = fc_unique_values[0] if len(fc_unique_values) == 1 else ""
+
+            aggregated_rows.append(field_column_unit_aggregation)
+        
+        aggregated_single_row_df = pd.DataFrame(aggregated_rows)
+
+        aggregated_data = aggregated_data + ((aggregated_single_row_df, data_quality_df, tags),)
 
     return aggregated_data
 
