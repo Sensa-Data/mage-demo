@@ -6,7 +6,7 @@ blocks:
     file_source:
       path: data_loaders/isolation_forest_read_minute_data.py
   downstream_blocks:
-  - isolation_forest_cleanup_obvious_outlier
+  - isolation_forest_aggregate_minute_data
   executor_config: null
   executor_type: local_python
   has_callback: false
@@ -18,23 +18,6 @@ blocks:
   type: data_loader
   upstream_blocks: []
   uuid: isolation_forest_read_minute_data
-- all_upstream_blocks_executed: true
-  color: null
-  configuration: {}
-  downstream_blocks:
-  - isolation_forest_aggregate_minute_data
-  executor_config: null
-  executor_type: local_python
-  has_callback: false
-  language: python
-  name: isolation_forest_cleanup_obvious_outlier
-  retry_config: null
-  status: executed
-  timeout: null
-  type: transformer
-  upstream_blocks:
-  - isolation_forest_read_minute_data
-  uuid: isolation_forest_cleanup_obvious_outlier
 - all_upstream_blocks_executed: true
   color: null
   configuration:
@@ -49,13 +32,13 @@ blocks:
   language: python
   name: isolation_forest_aggregate_minute_data
   retry_config: null
-  status: updated
+  status: executed
   timeout: null
   type: transformer
   upstream_blocks:
-  - isolation_forest_cleanup_obvious_outlier
+  - isolation_forest_read_minute_data
   uuid: isolation_forest_aggregate_minute_data
-- all_upstream_blocks_executed: false
+- all_upstream_blocks_executed: true
   color: null
   configuration:
     file_path: transformers/isolation_forest_detect_anomaly_minute_data.py
@@ -69,13 +52,13 @@ blocks:
   language: python
   name: isolation_forest_detect_anomaly_minute_data
   retry_config: null
-  status: updated
+  status: executed
   timeout: null
   type: transformer
   upstream_blocks:
   - isolation_forest_aggregate_minute_data
   uuid: isolation_forest_detect_anomaly_minute_data
-- all_upstream_blocks_executed: false
+- all_upstream_blocks_executed: true
   color: null
   configuration:
     file_path: data_exporters/isolation_forest_export_minute_data.py

@@ -34,17 +34,25 @@ def export_data(data, *args, **kwargs):
     ) as client:
         for idx, measurement_data in enumerate(data):
 
-            df = measurement_data[0]
-            tags = measurement_data[1]
+            df, data_quality_df, tags, *_ = measurement_data
             measurement = measurements[idx]
-            data_frame_measurement_name = f"demofarm_{measurement}"
-            
+            data_frame_anomaly_measurement_name = f"demofarm_{measurement}_min_anomaly"
+            data_frame_quality_measurement_name = f"demofarm_{measurement}_min_data_quality"
 
             client.write(
                     record=df,
-                    data_frame_measurement_name=data_frame_measurement_name,
+                    data_frame_measurement_name=data_frame_anomaly_measurement_name,
                     data_frame_timestamp_column="time",
                     data_frame_tag_columns=tags
             )
+            print(f"Wrote {len(df.index)} rows to {target_bucket} for anomaly")
 
-            print(f"Wrote {len(df.index)} rows to {target_bucket}")
+            client.write(
+                    record=data_quality_df,
+                    data_frame_measurement_name=data_frame_quality_measurement_name,
+                    data_frame_timestamp_column="time",
+                    data_frame_tag_columns=tags
+            )
+            print(f"Wrote {len(data_quality_df.index)} rows to {target_bucket} for quality")
+
+            
