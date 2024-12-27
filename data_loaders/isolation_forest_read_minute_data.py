@@ -10,8 +10,8 @@ import pandas as pd
 import numpy as np
 
 host = get_secret_value('influx_host')
-org = get_secret_value('read_biofish_raw_org')
-token = get_secret_value('read_biofish_raw_token')
+org = get_secret_value('prod_org')
+token = get_secret_value('demofarm_raw_read_token')
 
 measurements=["WaterQuality", "feedingsystem"]
 source_bucket = 'biofish_raw'
@@ -19,7 +19,7 @@ source_bucket = 'biofish_raw'
 @data_loader
 def load_data(*args, **kwargs):
     """
-    Read raw data from biofish_min
+    Read raw data from biofish_raw
 
     Returns:
         tuple(dataframe, tags)

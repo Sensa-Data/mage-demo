@@ -1,65 +1,74 @@
 blocks:
 - all_upstream_blocks_executed: true
   color: null
-  configuration: {}
+  configuration:
+    file_path: data_loaders/demofarm_read_hourly_daily.py
+    file_source:
+      path: data_loaders/demofarm_read_hourly_daily.py
   downstream_blocks:
-  - salmonique/aggregate_minute
+  - demofarm_aggregate_hourly_daily
   executor_config: null
   executor_type: local_python
   has_callback: false
   language: python
-  name: salmonique/read_raw_data
+  name: demofarm_read_hourly_daily
   retry_config: null
   status: updated
   timeout: null
   type: data_loader
   upstream_blocks: []
-  uuid: salmonique/read_raw_data
+  uuid: demofarm_read_hourly_daily
 - all_upstream_blocks_executed: false
   color: null
-  configuration: {}
+  configuration:
+    file_path: transformers/demofarm_aggregate_hourly_daily.py
+    file_source:
+      path: transformers/demofarm_aggregate_hourly_daily.py
   downstream_blocks:
-  - salmonique_write_to_influx
+  - demofarm_export_hourly_daily
   executor_config: null
   executor_type: local_python
   has_callback: false
   language: python
-  name: salmonique/aggregate_minute
+  name: demofarm_aggregate_hourly_daily
   retry_config: null
   status: updated
   timeout: null
   type: transformer
   upstream_blocks:
-  - salmonique/read_raw_data
-  uuid: salmonique/aggregate_minute
+  - demofarm_read_hourly_daily
+  uuid: demofarm_aggregate_hourly_daily
 - all_upstream_blocks_executed: false
   color: null
-  configuration: {}
+  configuration:
+    file_path: data_exporters/demofarm_export_hourly_daily.py
+    file_source:
+      path: data_exporters/demofarm_export_hourly_daily.py
   downstream_blocks: []
   executor_config: null
   executor_type: local_python
   has_callback: false
   language: python
-  name: salmonique_write_to_influx
+  name: demofarm_export_hourly_daily
   retry_config: null
   status: updated
   timeout: null
   type: data_exporter
   upstream_blocks:
-  - salmonique/aggregate_minute
-  uuid: salmonique_write_to_influx
+  - demofarm_aggregate_hourly_daily
+  uuid: demofarm_export_hourly_daily
 cache_block_output_in_memory: false
 callbacks: []
 concurrency_config: {}
 conditionals: []
-created_at: '2024-10-21 07:16:35.007726+00:00'
+created_at: '2024-11-05 07:35:47.327419+00:00'
 data_integration: null
 description: null
 executor_config: {}
 executor_count: 1
 executor_type: null
 extensions: {}
-name: Salomonique Aggregation
+name: Demofarm Aggregation Hourly Daily
 notification_config: {}
 remote_variables_dir: null
 retry_config: {}
@@ -69,8 +78,8 @@ settings:
 spark_config: {}
 tags: []
 type: python
-uuid: salomonique_aggregation
+uuid: demofarm_aggregation_hourly_daily
 variables:
-  interval: minute
-variables_dir: /home/src/mage_data/default_repo
+  trigger_interval: var_trigger_interval
+variables_dir: /home/src/mage_data/sensa-dataops
 widgets: []

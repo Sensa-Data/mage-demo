@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import numpy as np
 import joblib
@@ -8,8 +9,6 @@ if 'transformer' not in globals():
     from mage_ai.data_preparation.decorators import transformer
 if 'test' not in globals():
     from mage_ai.data_preparation.decorators import test
-
-from default_repo.utils.models.kmeans.kmeans_utils import anomaly_predict_kmeans, anomaly_predict_kmeans_single
 
 
 @transformer

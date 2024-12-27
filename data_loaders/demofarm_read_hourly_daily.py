@@ -7,10 +7,11 @@ from datetime import datetime, timedelta
 from influxdb_client_3 import InfluxDBClient3
 import pandas as pd
 
+#Reading and writing from same bucket
 host = get_secret_value('influx_host')
-org = get_secret_value('biofish_long_write_org')
-token = get_secret_value('biofish_long_token')
-bucket = 'biofish_long'
+org = get_secret_value('dev_org')
+token = get_secret_value('demofarm_long_read_token')
+bucket = 'demofarm_long'
 measurements=["WaterQuality", "feedingsystem"]
 
 
@@ -22,10 +23,11 @@ def load_data(*args, **kwargs):
     Returns:
         tuple(minute data, tags)
     """
+    
     schedule_time = kwargs.get('execution_date')
     stop_time = datetime.fromisoformat(str(schedule_time)).replace(tzinfo=None)
     trigger_interval = kwargs.get('trigger_interval' , None)
-    #trigger_interval = 'hour'
+    # trigger_interval = 'day'
     if trigger_interval is None or trigger_interval.startswith('var'):
         raise Exception("Set trigger Interval")
     if trigger_interval =='hour':

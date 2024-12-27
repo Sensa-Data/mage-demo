@@ -22,14 +22,14 @@ def export_data(data, *args, **kwargs):
         displayed when inspecting the block run.
     """
     # Specify your data exporting logic here
-    org = get_secret_value('biofish_long_write_org')
-    target_bucket = 'biofish_long'
+    org = get_secret_value('dev_org')
+    target_bucket = 'demofarm_long'
     measurements=["WaterQuality", "feedingsystem"]
 
     with InfluxDBClient3(
         host=get_secret_value('influx_host'),
         org=org,
-        token=get_secret_value('biofish_long_token'),
+        token=get_secret_value('demofarm_long_write_token'),
         database=target_bucket
     ) as client:
         for idx, measurement_data in enumerate(data):
@@ -37,7 +37,7 @@ def export_data(data, *args, **kwargs):
             df = measurement_data[0]
             tags = measurement_data[1]
             measurement = measurements[idx]
-            data_frame_measurement_name = f"biofish_{measurement}_min_anomaly"
+            data_frame_measurement_name = f"demofarm_{measurement}"
             
 
             client.write(
