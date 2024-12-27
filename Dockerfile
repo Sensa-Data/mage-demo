@@ -1,5 +1,9 @@
-# Use a mageai base image
-FROM mageai/mageai
+FROM mageai/mageai:0.9.75
 
-# Set working directory
-RUN pip install numpy pandas scikit-learn influxdb-client matplotlib seaborn statsmodels plotly joblib
+ARG USER_CODE_PATH=/home/src/${PROJECT_NAME}
+
+# Note: this overwrites the requirements.txt file in your new project on first run.
+# You can delete this line for the second run :)
+COPY requirements.txt ${USER_CODE_PATH}/requirements.txt
+
+RUN pip3 install -r ${USER_CODE_PATH}/requirements.txt

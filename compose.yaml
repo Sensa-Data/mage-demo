@@ -1,0 +1,31 @@
+services:
+  magic:
+    image: mageai/mageai:0.9.75  # latest, 0.9.75
+    command: mage start ${PROJECT_NAME}
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      USER_CODE_PATH: /home/src/${PROJECT_NAME}
+      MAGE_DATABASE_CONNECTION_URL: postgresql+psycopg2://mage:mage@postgres:5432/mage
+    ports:
+      - 6789:6789
+    volumes:
+      - ${PROJECT_DIR}:/home/src/
+    restart: on-failure:5
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: mage
+      POSTGRES_USER: mage
+      POSTGRES_PASSWORD: mage
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

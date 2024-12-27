@@ -70,3 +70,36 @@ features:
 pipelines:
 logging_config:
   retention_period: '7d'
+
+k8s_executor_config:
+  job_name_prefix: data-prep
+  namespace: dev
+  resource_limits:
+    cpu: 4000m
+    memory: 8192Mi
+  resource_requests:
+    cpu: 500m
+    memory: 1024Mi
+  service_account_name: sdm-dev-demo-mageai
+  pod:
+    tolerations:
+      - key: "name"
+        operator: "Equal"
+        value: "executor"
+        effect: "NoExecute"
+    affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: "name"
+                operator: "In"
+                values:
+                - "executor"
+  container:
+    name: "mage-executor"
+    env:
+      - name: "KUBE_NAMESPACE"
+        value: "dev"
+    image: "sensa.azurecr.io/sensa-executor:v4"
+    image_pull_policy: "IfNotPresent"
